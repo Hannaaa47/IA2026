@@ -16,17 +16,8 @@ public class Solucion2 {
     public Solucion2(String e) {
         estadoActual = e;
     }
-    
-    public void solucionar() {
-        if (bfs()) {
-            System.out.println("¡Solución encontrada en " + (camino.size() - 1) + " pasos!");
-            imprimirSolucion();
-        } else {
-            System.out.println("No se encontró solución.");
-        }
-    }
-    
-    private boolean bfs() {
+        
+    public boolean bfs() {
         Queue<Nodo> cola = new LinkedList<>();
         Set<String> visitados = new HashSet<>();
         
@@ -58,6 +49,75 @@ public class Solucion2 {
         return false;
     }
     
+    public boolean dfs() {
+        Stack<Nodo> pila = new Stack<>();
+        Set<String> visitados = new HashSet<>();
+        
+        Nodo raiz = new Nodo(estadoActual, 0, null);
+        pila.push(raiz);
+        visitados.add(estadoActual);
+        
+        while (!pila.isEmpty()) {
+            Nodo nodoActual = pila.pop();
+            
+            if (nodoActual.estado.equals(estadoFinal)) {
+                reconstruirCaminoDesdeNodo(nodoActual);
+                return true;
+            }
+            
+            int posVacia = nodoActual.estado.indexOf('*');
+            
+            for (int i = movimientos[posVacia].length - 1; i >= 0; i--) {
+                int destino = movimientos[posVacia][i];
+                String nuevoEstado = intercambiar(nodoActual.estado, posVacia, destino);
+                
+                if (!visitados.contains(nuevoEstado)) {
+                    visitados.add(nuevoEstado);
+                    Nodo nodoHijo = new Nodo(nuevoEstado, nodoActual.nivel + 1, nodoActual);
+                    pila.push(nodoHijo);
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    public boolean ucs() {
+        PriorityQueue<Nodo> colaPrioridad = new PriorityQueue<>((a, b) -> 
+            Integer.compare(a.costo, b.costo));
+        Map<String, Integer> visitados = new HashMap<>();
+        
+        Nodo raiz = new Nodo(estadoActual, 0, null);
+        raiz.costo = 0;
+        colaPrioridad.add(raiz);
+        visitados.put(estadoActual, 0);
+        
+        while (!colaPrioridad.isEmpty()) {
+            Nodo nodoActual = colaPrioridad.poll();
+            
+            if (nodoActual.estado.equals(estadoFinal)) {
+                reconstruirCaminoDesdeNodo(nodoActual);
+                return true;
+            }
+            
+            int posVacia = nodoActual.estado.indexOf('*');
+            
+            for (int destino : movimientos[posVacia]) {
+                String nuevoEstado = intercambiar(nodoActual.estado, posVacia, destino);
+                int nuevoCosto = nodoActual.costo + 1; 
+                
+                if (!visitados.containsKey(nuevoEstado) || nuevoCosto < visitados.get(nuevoEstado)) {
+                    visitados.put(nuevoEstado, nuevoCosto);
+                    Nodo nodoHijo = new Nodo(nuevoEstado, nodoActual.nivel + 1, nodoActual);
+                    nodoHijo.costo = nuevoCosto;
+                    colaPrioridad.add(nodoHijo);
+                }
+            }
+        }
+        
+        return false;
+    }
+    
     private void reconstruirCaminoDesdeNodo(Nodo nodoFinal) {
         camino.clear();
         
@@ -82,7 +142,7 @@ public class Solucion2 {
         return new String(chars);
     }
     
-    private void imprimirSolucion() {
+    public void imprimirSolucion() {
         System.out.println("Camino de solución (" + (camino.size() - 1) + " movimientos):");
         System.out.println("=" .repeat(40));
         
