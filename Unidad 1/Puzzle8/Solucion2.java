@@ -3,9 +3,12 @@ package Puzzle8;
 import java.util.*;
 
 public class Solucion2 {
-    String estadoActual;
-    String estadoFinal = "12345678*";
+    private String estadoActual;
+    private String estadoFinal = "12345678*";
     private List<String> camino = new ArrayList<>();
+    
+    private long nodosExpandidos;
+    private long tiempoInicio;
     
     private int[][] movimientos = {
         {1, 3}, {0, 2, 4}, {1, 5},
@@ -18,6 +21,8 @@ public class Solucion2 {
     }
         
     public boolean bfs() {
+    	nodosExpandidos = 0;
+    	tiempoInicio = System.currentTimeMillis();
         Queue<Nodo> cola = new LinkedList<>();
         Set<String> visitados = new HashSet<>();
         
@@ -41,6 +46,7 @@ public class Solucion2 {
                 if (!visitados.contains(nuevoEstado)) {
                     visitados.add(nuevoEstado);
                     Nodo nodoHijo = new Nodo(nuevoEstado, nodoActual.nivel + 1, nodoActual);
+                    nodosExpandidos++;
                     cola.add(nodoHijo);
                 }
             }
@@ -50,6 +56,8 @@ public class Solucion2 {
     }
     
     public boolean dfs() {
+    	nodosExpandidos = 0;
+    	tiempoInicio = System.currentTimeMillis();
         Stack<Nodo> pila = new Stack<>();
         Set<String> visitados = new HashSet<>();
         
@@ -74,6 +82,7 @@ public class Solucion2 {
                 if (!visitados.contains(nuevoEstado)) {
                     visitados.add(nuevoEstado);
                     Nodo nodoHijo = new Nodo(nuevoEstado, nodoActual.nivel + 1, nodoActual);
+                    nodosExpandidos++;
                     pila.push(nodoHijo);
                 }
             }
@@ -83,8 +92,9 @@ public class Solucion2 {
     }
 
     public boolean ucs() {
-        PriorityQueue<Nodo> colaPrioridad = new PriorityQueue<>((a, b) -> 
-            Integer.compare(a.costo, b.costo));
+    	nodosExpandidos = 0;
+    	tiempoInicio = System.currentTimeMillis();
+        PriorityQueue<Nodo> colaPrioridad = new PriorityQueue<>((a, b) -> Integer.compare(a.costo, b.costo));
         Map<String, Integer> visitados = new HashMap<>();
         
         Nodo raiz = new Nodo(estadoActual, 0, null);
@@ -110,6 +120,7 @@ public class Solucion2 {
                     visitados.put(nuevoEstado, nuevoCosto);
                     Nodo nodoHijo = new Nodo(nuevoEstado, nodoActual.nivel + 1, nodoActual);
                     nodoHijo.costo = nuevoCosto;
+                    nodosExpandidos++;
                     colaPrioridad.add(nodoHijo);
                 }
             }
@@ -163,4 +174,62 @@ public class Solucion2 {
         }
     }
     
+    private void imprimirEstadisticas(String nombre, boolean exito) {
+        long tiempo = System.currentTimeMillis() - tiempoInicio;
+
+        System.out.println("===== " + nombre + " =====");
+        System.out.println("¿Solución encontrada?: " + exito);
+        System.out.println("Longitud solución: " + (exito ? camino.size()-1 : -1));
+        System.out.println("Nodos expandidos: " + nodosExpandidos);
+        System.out.println("Tiempo(ms): " + tiempo);
+        System.out.println();
+    }
+    
+    public void compararAlgoritmos() {        
+        System.out.println("Tabla comparativa sobre los diversos algoritmos de búsqueda en Puzzle 8");
+        System.out.println("================================================================");
+        System.out.printf("%-10s %-10s %-12s %-15s %-10s%n",
+                "Algoritmo", "Exito", "Movimientos", "Nodos", "Tiempo(ms)");
+        System.out.println("================================================================");
+
+        boolean exito;
+        long tiempo;
+        int movimientos;
+
+        camino.clear();
+        nodosExpandidos = 0;
+        tiempoInicio = System.currentTimeMillis();
+
+        exito = bfs();
+
+        tiempo = System.currentTimeMillis() - tiempoInicio;
+        movimientos = exito ? camino.size() - 1 : -1;
+
+        System.out.printf("%-10s %-10s %-12d %-15d %-10d%n", "BFS", exito ? "SI" : "NO", movimientos, nodosExpandidos, tiempo);
+
+        camino.clear();
+        nodosExpandidos = 0;
+        tiempoInicio = System.currentTimeMillis();
+
+        exito = dfs();
+
+        tiempo = System.currentTimeMillis() - tiempoInicio;
+        movimientos = exito ? camino.size() - 1 : -1;
+
+        System.out.printf("%-10s %-10s %-12d %-15d %-10d%n", "DFS", exito ? "SI" : "NO", movimientos, nodosExpandidos, tiempo);
+
+
+        camino.clear();
+        nodosExpandidos = 0;
+        tiempoInicio = System.currentTimeMillis();
+
+        exito = ucs();
+
+        tiempo = System.currentTimeMillis() - tiempoInicio;
+        movimientos = exito ? camino.size() - 1 : -1;
+
+        System.out.printf("%-10s %-10s %-12d %-15d %-10d%n", "UCS", exito ? "SI" : "NO", movimientos, nodosExpandidos, tiempo);
+        
+        System.out.println("================================================================");
+    }
 }
