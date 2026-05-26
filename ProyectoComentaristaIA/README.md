@@ -1,7 +1,7 @@
 ![portada](portada_page-0001.jpg)
 
 Link del video 
-https://youtu.be/aspk14fAYEM 
+https://youtu.be/uEhNpneyqHE
 
 
 # 🎮 Narrador IA
